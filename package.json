@@ -1,7 +1,7 @@
 {
   "name": "campus-ai-workshop-3d",
   "private": true,
-  "version": "0.5.0",
+  "version": "0.6.0",
   "type": "module",
   "description": "校园 AI 创作工坊 · 100㎡ 空间 3D 场景展示站",
   "engines": {

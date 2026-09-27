@@ -12,9 +12,9 @@ export function Lighting({ mode }: { mode: TimeMode }) {
   const l = mode.lights
   return (
     <>
-      <ambientLight intensity={l.ambient.intensity * 1.35} color={l.ambient.color} />
+      <ambientLight intensity={l.ambient.intensity * 1.5} color={l.ambient.color} />
       <hemisphereLight
-        intensity={l.hemi.intensity * 1.3}
+        intensity={l.hemi.intensity * 1.45}
         color={l.hemi.sky}
         groundColor={l.hemi.ground}
       />
@@ -36,9 +36,9 @@ export function Lighting({ mode }: { mode: TimeMode }) {
       {/* 室内补光：靠近相机一侧的暖色低强度补光，避免南侧家具全黑 */}
       <pointLight
         position={[ROOM.width / 2 + 3.5, 3.4, ROOM.depth / 2 + 3]}
-        intensity={l.sun.intensity > 0 ? 2.4 : 0.9}
+        intensity={l.sun.intensity > 0 ? 3.0 : 1.5}
         color="#ffe6c4"
-        distance={16}
+        distance={19}
         decay={1.6}
       />
       <PendantLamps lights={l} />

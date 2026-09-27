@@ -5,7 +5,7 @@
 
 import { Button, Switch } from 'animal-island-ui'
 import { BulbIcon, CoffeeIcon, FlowerIcon, MoonIcon, RefreshIcon, SunIcon } from 'naive-icons'
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react'
 import { HALL_LAYOUTS, SECTIONS } from '../data/content'
 import { LAYOUT_HINTS, LAYOUT_LABELS, type HallLayout } from '../data/layouts'
 import { ZONES } from '../data/room'
@@ -22,10 +22,66 @@ const MODE_ICON: Record<TimeModeKey, ReactNode> = {
   night: <MoonIcon size={16} />,
 }
 
+/** naive-icons 无全屏图标，用内联 SVG 画四角括号（展开 / 收起两态） */
+function FullScreenIcon({ active }: { active: boolean }) {
+  const d = active
+    ? 'M6 10H3V7M6 6V3H3M10 6V3h3v3M10 10h3V7'
+    : 'M3 6h3V3M7 3h3v3M11 7v3h3M14 11h-3v3M7 14H4v-3'
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+      <path d={d} stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
+type FullscreenEl = HTMLElement & {
+  webkitRequestFullscreen?: () => Promise<void> | void
+}
+type FullscreenDoc = Document & {
+  webkitExitFullscreen?: () => Promise<void> | void
+  webkitFullscreenElement?: Element | null
+}
+
 export function SceneSection() {
   const { mode, layout, showOccupants, showLabels } = useSceneState()
   const { setMode, setLayout, toggleOccupants, toggleLabels, resetView } = useSceneActions()
   const current = TIME_MODE_BY_KEY[mode]
+
+  const stageRef = useRef<HTMLDivElement | null>(null)
+  const [fullscreen, setFullscreen] = useState(false)
+  const [fullscreenSupported, setFullscreenSupported] = useState(true)
+
+  // Esc 与浏览器全屏快捷键都会触发 fullscreenchange，据此回写按钮状态
+  useEffect(() => {
+    const sync = () => {
+      const doc = document as FullscreenDoc
+      const el = document.fullscreenElement ?? doc.webkitFullscreenElement ?? null
+      setFullscreen(el === stageRef.current)
+    }
+    document.addEventListener('fullscreenchange', sync)
+    document.addEventListener('webkitfullscreenchange', sync)
+    setFullscreenSupported(
+      typeof stageRef.current?.requestFullscreen === 'function' ||
+        typeof (stageRef.current as FullscreenEl | null)?.webkitRequestFullscreen === 'function',
+    )
+    return () => {
+      document.removeEventListener('fullscreenchange', sync)
+      document.removeEventListener('webkitfullscreenchange', sync)
+    }
+  }, [])
+
+  const toggleFullscreen = useCallback(() => {
+    const el = stageRef.current as FullscreenEl | null
+    if (!el) return
+    const doc = document as FullscreenDoc
+    if (document.fullscreenElement ?? doc.webkitFullscreenElement) {
+      const exit = doc.exitFullscreen ?? doc.webkitExitFullscreen
+      exit?.call(document)
+    } else {
+      const enter = el.requestFullscreen ?? el.webkitRequestFullscreen
+      enter?.call(el)
+    }
+  }, [])
 
   return (
     <section className="section wrap" id="scene">
@@ -49,7 +105,7 @@ export function SceneSection() {
 
       <div className="scene-layout">
         <div>
-          <div className="stage" style={{ background: current.lights.skyColor }}>
+          <div className="stage" ref={stageRef} style={{ background: current.lights.skyColor }}>
             <WorkshopScene />
 
             <div className="stage-overlay stage-tl" aria-hidden="true">
@@ -90,6 +146,16 @@ export function SceneSection() {
                 unCheckedChildren="隐藏标签"
                 aria-label="显示分区标签"
               />
+              <Button
+                size="small"
+                type="default"
+                icon={<FullScreenIcon active={fullscreen} />}
+                onClick={toggleFullscreen}
+                disabled={!fullscreenSupported}
+                aria-label={fullscreen ? '退出全屏' : '全屏查看 3D 场景'}
+              >
+                {fullscreen ? '退出全屏' : '全屏'}
+              </Button>
               <Button size="small" type="default" icon={<RefreshIcon size={14} />} onClick={resetView}>
                 复位
               </Button>

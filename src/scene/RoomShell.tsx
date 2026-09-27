@@ -224,7 +224,7 @@ export function PendantLamps({ lights }: { lights: LightConfig }) {
             <pointLight
               color={lights.pendant.color}
               intensity={lit ? lights.pendant.intensity * 0.5 : 0}
-              distance={7.5}
+              distance={9}
               decay={2}
               position={[0, 2.14, 0]}
             />

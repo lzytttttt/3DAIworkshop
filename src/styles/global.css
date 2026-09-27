@@ -273,6 +273,19 @@ p {
   outline: none;
 }
 
+/* 全屏：把舞台铺满视口，去掉圆角描边与固定宽高比 */
+.stage:fullscreen,
+.stage:-webkit-full-screen {
+  aspect-ratio: auto;
+  min-height: 0;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+}
+
 .stage-overlay {
   position: absolute;
   pointer-events: none;

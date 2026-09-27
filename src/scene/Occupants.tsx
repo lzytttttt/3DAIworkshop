@@ -49,6 +49,7 @@ function buildPeople(mode: TimeMode, layout: HallLayout): Person[] {
       if (zone.key === 'table') ry = Math.atan2((x < 5.7 ? 4.7 : 6.9) - x, 0)
       if (zone.key === 'bar') ry = Math.PI
       if (zone.key === 'corr') ry = -Math.PI / 2 + (i % 2 ? 0.45 : -0.3)
+      if (zone.key === 'quiet') ry = x < 9 ? -Math.PI / 2 : 0
       if (zone.key === 'back') ry = Math.PI * (i % 2 ? 0.9 : 0.1)
       out.push({ x, z, ry, seated: zone.key !== 'corr', seed: i * 5 + zone.name.length })
     })

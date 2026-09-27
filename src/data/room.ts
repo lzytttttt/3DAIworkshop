@@ -95,7 +95,7 @@ export const ZONES: Zone[] = [
     hex: '#889df0',
     activities: '独立写稿、剪辑、渲染等待、远程面试',
     config: '10 个软座工位、隔断屏风、2 个隔音电话亭、独立照明回路、静音标识',
-    camOffset: [3.4, 4.2, 4.2],
+    camOffset: [3.2, 5.4, 4.6],
   },
   {
     key: 'corr',
@@ -121,7 +121,7 @@ export const ZONES: Zone[] = [
     hex: '#9a835a',
     activities: '备料、清洁、储物、员工休息与办公',
     config: '双门冷柜、洗涤槽与消毒柜、储物架、员工位与监控主机、卫生间',
-    camOffset: [2.4, 4.2, 4.6],
+    camOffset: [2.9, 5.2, 4.2],
   },
   {
     key: 'hall',

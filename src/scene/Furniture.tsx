@@ -36,6 +36,7 @@ export const M = {
     side: THREE.DoubleSide,
   }),
   mug: new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.85 }),
+  signFace: std(C.teal, 0.7),
 }
 
 /** 四根柱脚，供各家具拼装 */
@@ -444,10 +445,10 @@ export function Fridge({ x, z, ry = Math.PI / 2 }: { x: number; z: number; ry?: 
   )
 }
 
-/** 洗涤槽与消毒柜（沿南墙，面朝 -Z） */
-export function SinkCounter({ x, z }: { x: number; z: number }) {
+/** 洗涤槽与消毒柜；默认沿南墙布置时传 ry={Math.PI} 让水槽朝北 */
+export function SinkCounter({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
   return (
-    <group position={[x, 0, z]}>
+    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
       <mesh material={M.steel} position={[0, 0.44, 0]} castShadow>
         <boxGeometry args={[1.5, 0.86, 0.6]} />
       </mesh>
@@ -467,10 +468,18 @@ export function SinkCounter({ x, z }: { x: number; z: number }) {
   )
 }
 
-/** 储物架（面朝 +X） */
-export function StorageRack({ x, z }: { x: number; z: number }) {
+/** 储物架；ry=0 时长边沿 X（贴墙成一排），默认 π/2 长边沿 Z */
+export function StorageRack({
+  x,
+  z,
+  ry = Math.PI / 2,
+}: {
+  x: number
+  z: number
+  ry?: number
+}) {
   return (
-    <group position={[x, 0, z]} rotation={[0, Math.PI / 2, 0]}>
+    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
       <mesh material={M.steelDark} position={[0, 0.86, 0]} castShadow>
         <boxGeometry args={[1.2, 1.72, 0.42]} />
       </mesh>
@@ -522,39 +531,50 @@ export function StaffDesk({ x, z, ry = 0 }: { x: number; z: number; ry?: number 
   )
 }
 
-/** 卫生间体块，两扇门朝北 */
-export function ToiletBlock() {
+/**
+ * 卫生间体块，两扇门朝 +Z（默认）。
+ * x/z 取体块外包围盒中心（门在 −Z 侧），便于沿西侧整体摆放。
+ */
+export function ToiletBlock({
+  x,
+  z,
+  ry = 0,
+}: {
+  x: number
+  z: number
+  ry?: number
+}) {
   return (
-    <group>
-      <mesh material={M.concrete} position={[5.2, 1.15, 8.16]} castShadow receiveShadow>
+    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
+      <mesh material={M.concrete} position={[0, 1.15, 0.5]} castShadow receiveShadow>
         <boxGeometry args={[1.9, 2.3, 0.34]} />
       </mesh>
-      <mesh material={M.concrete} position={[6.15, 1.15, 7.66]} castShadow receiveShadow>
+      <mesh material={M.concrete} position={[0.95, 1.15, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.3, 2.3, 1.34]} />
       </mesh>
-      <mesh material={M.concrete} position={[4.25, 1.15, 7.66]} castShadow receiveShadow>
+      <mesh material={M.concrete} position={[-0.95, 1.15, 0]} castShadow receiveShadow>
         <boxGeometry args={[0.3, 2.3, 1.34]} />
       </mesh>
-      <mesh material={M.concrete} position={[5.2, 1.15, 6.99]} castShadow receiveShadow>
+      <mesh material={M.concrete} position={[0, 1.15, -0.67]} castShadow receiveShadow>
         <boxGeometry args={[0.2, 2.3, 0.22]} />
       </mesh>
-      {[4.75, 5.65].map((ox) => (
-        <mesh key={ox} material={M.concrete} position={[ox, 2.15, 6.99]}>
+      {[-0.45, 0.45].map((ox) => (
+        <mesh key={ox} material={M.concrete} position={[ox, 2.15, -0.67]}>
           <boxGeometry args={[0.7, 0.3, 0.22]} />
         </mesh>
       ))}
-      {[4.75, 5.65].map((ox) => (
-        <mesh key={ox} material={M.woodDark} position={[ox, 1.0, 6.86]}>
+      {[-0.45, 0.45].map((ox) => (
+        <mesh key={ox} material={M.woodDark} position={[ox, 1.0, -0.8]}>
           <boxGeometry args={[0.66, 2.0, 0.06]} />
         </mesh>
       ))}
-      {[5.03, 5.93].map((ox) => (
-        <mesh key={ox} material={M.steel} position={[ox, 0.98, 6.82]}>
+      {[-0.17, 0.73].map((ox) => (
+        <mesh key={ox} material={M.steel} position={[ox, 0.98, -0.84]}>
           <boxGeometry args={[0.04, 0.16, 0.04]} />
         </mesh>
       ))}
-      {[4.6, 5.5].map((ox) => (
-        <mesh key={ox} material={M.paper} position={[ox, 1.72, 6.85]}>
+      {[-0.6, 0.3].map((ox) => (
+        <mesh key={ox} material={M.paper} position={[ox, 1.72, -0.81]}>
           <boxGeometry args={[0.24, 0.18, 0.02]} />
         </mesh>
       ))}
@@ -581,6 +601,30 @@ export function RoundTable({ x, z, r = 0.78 }: { x: number; z: number; r?: numbe
       >
         <primitive object={M.mug} attach="material" />
       </Instanced>
+    </group>
+  )
+}
+
+/** 静音区软座工位的小桌板（可实例化）：桌板 0.40×0.22 + 钢柱 + 底座 */
+export const SIDE_TABLE_GEO = merged([
+  { size: [0.4, 0.04, 0.22], pos: [0, 0.7, 0], color: C.top },
+  { size: [0.05, 0.68, 0.05], pos: [0, 0.36, 0], color: C.steelDark },
+  { size: [0.26, 0.04, 0.18], pos: [0, 0.02, 0], color: C.steelDark },
+])
+
+/** 静音标识小立牌：贴墙摆放，落实 config 里的「静音标识」 */
+export function QuietSign({ x, z, ry = 0 }: { x: number; z: number; ry?: number }) {
+  return (
+    <group position={[x, 0, z]} rotation={[0, ry, 0]}>
+      <mesh material={M.steelDark} position={[0, 0.5, 0]} castShadow>
+        <boxGeometry args={[0.04, 1.0, 0.04]} />
+      </mesh>
+      <mesh material={M.woodDark} position={[0, 1.16, 0]} castShadow>
+        <boxGeometry args={[0.5, 0.36, 0.04]} />
+      </mesh>
+      <mesh material={M.signFace} position={[0, 1.16, 0.025]}>
+        <boxGeometry args={[0.42, 0.28, 0.01]} />
+      </mesh>
     </group>
   )
 }

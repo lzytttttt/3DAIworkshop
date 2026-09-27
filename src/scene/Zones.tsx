@@ -25,7 +25,9 @@ import {
   MenuBoard,
   PhoneBooth,
   Plant,
+  QuietSign,
   RollingScreen,
+  SIDE_TABLE_GEO,
   STOOL_GEO,
   Screen,
   SignPost,
@@ -105,7 +107,6 @@ const MUGS: Pose[] = [
   { p: [6.45, 0.78, 4.35] },
 ]
 
-const QUIET_CHAIRS: Pose[] = ZONE_ANCHORS.quiet.map(([x, z]) => ({ p: [x, 0, z] }))
 const BAR_STOOLS: Pose[] = ZONE_ANCHORS.bar.map(([x, z]) => ({ p: [x, 0, z], ry: Math.PI }))
 
 const ART_COLORS = ['#e59266', '#82d5bb', '#889df0', '#f7cd67', '#c4694a', '#2e6b5e', '#9a835a', '#d8b892']
@@ -128,21 +129,50 @@ const TRACK_GEO = merged([
 
 const TRACKS: Pose[] = Array.from({ length: 12 }, (_, i) => ({ p: [0.44, 2.72, 4.45 + i * 0.33] }))
 
+/**
+ * 静音专注区：三排软座工位（每座配一块侧前小桌板）+ 隔断屏风 + 2 个电话亭 + 书架。
+ * 布点原则——高构件（书架 / 电话亭）全部贴北墙，离东南机位最远；东侧留纵向主通道；
+ * 西、南两侧留环形通道。净距与通行经脚本核验：全部在界内、无穿模、各工位可达。
+ */
+const QUIET_COL_X = [9.35, 10.2, 11.05]
+const QUIET_ROW_Z = [1.2, 1.98, 2.76]
+
+const QUIET_CHAIRS: Pose[] = [
+  ...QUIET_ROW_Z.flatMap((z) =>
+    QUIET_COL_X.map((x) => ({ p: [x, 0, z] as [number, number, number] })),
+  ),
+  { p: [8.45, 0, 2.68], ry: -Math.PI / 2 },
+]
+
+/** 小桌板：前两排在座位正前方，末排与次排背靠背（避免越南界）；末位是西南角单人位的桌板 */
+const QUIET_TABLES: Pose[] = [
+  ...QUIET_COL_X.flatMap((x) => [
+    { p: [x, 0, QUIET_ROW_Z[0] + 0.45] as [number, number, number] },
+    { p: [x, 0, QUIET_ROW_Z[1] + 0.45] as [number, number, number] },
+    { p: [x, 0, QUIET_ROW_Z[2] - 0.45] as [number, number, number] },
+  ]),
+  { p: [8.45, 0, 2.28] as [number, number, number] },
+]
+
 /** 静音专注区 */
 function QuietZone() {
   return (
     <>
-      <Bookshelf x={10} z={0.22} width={3.8} />
+      <Bookshelf x={8.85} z={0.2} width={1.5} />
+      <PhoneBooth x={10.6} z={0.42} />
+      <PhoneBooth x={11.52} z={0.42} />
+      <QuietSign x={11.9} z={1.9} ry={Math.PI / 2} />
       <Instanced geometry={ARMCHAIR_GEO} poses={QUIET_CHAIRS} castShadow receiveShadow>
         <primitive object={M.vcolSoft} attach="material" />
       </Instanced>
-      {[9.1, 9.9, 10.7].map((x) => (
-        <Screen key={x} x={x} z={1.16} />
-      ))}
-      <PhoneBooth x={9.55} z={2.62} />
-      <PhoneBooth x={10.4} z={2.62} />
-      <Plant x={11.65} z={0.62} scale={1.05} />
-      <Plant x={8.4} z={2.85} scale={0.9} />
+      <Instanced geometry={SIDE_TABLE_GEO} poses={QUIET_TABLES} castShadow receiveShadow>
+        <primitive object={M.vcol} attach="material" />
+      </Instanced>
+      {/* 屏风放在西、东两侧空档（列间仅 17cm，放不下） */}
+      <Screen x={8.6} z={1.55} len={0.9} />
+      <Screen x={11.7} z={1.55} len={0.9} />
+      <Plant x={8.35} z={0.75} scale={0.8} />
+      <Plant x={11.7} z={2.85} scale={0.8} />
     </>
   )
 }
@@ -233,7 +263,11 @@ function CorridorZone() {
   )
 }
 
-/** 后勤区：隔断、储物、卫生间、员工位 */
+/**
+ * 后勤区：隔断、储物、卫生间、员工位。
+ * 布点原则——高体块（卫生间）贴南侧并背对东南机位，湿区设备（洗涤槽 / 冷柜）贴北缘，
+ * 西缘 x≈3（隔断以北）留出入通道。
+ */
 function BackZone() {
   return (
     <>
@@ -243,13 +277,13 @@ function BackZone() {
       <mesh material={M.wallCap} position={[3.08, 2.34, 7.215]}>
         <boxGeometry args={[0.18, 0.08, 2.29]} />
       </mesh>
-      <StorageRack x={3.58} z={5.75} />
-      <StorageRack x={3.58} z={7.0} />
-      <ToiletBlock />
-      <SinkCounter x={5.05} z={6.55} />
-      <Fridge x={7.4} z={7.95} ry={Math.PI} />
-      <StaffDesk x={6.9} z={6.3} />
-      <Instanced geometry={CHAIR_GEO} poses={[{ p: [6.9, 0, 6.95], ry: Math.PI }]} castShadow>
+      <StorageRack x={4.3} z={5.42} ry={0} />
+      <StorageRack x={4.3} z={5.86} ry={0} />
+      <ToiletBlock x={4.3} z={7.6} />
+      <SinkCounter x={6.0} z={5.53} />
+      <Fridge x={7.6} z={5.9} ry={-Math.PI / 2} />
+      <StaffDesk x={6.5} z={7.1} ry={Math.PI} />
+      <Instanced geometry={CHAIR_GEO} poses={[{ p: [6.5, 0, 6.4] }]} castShadow>
         <primitive object={M.vcolSoft} attach="material" />
       </Instanced>
     </>

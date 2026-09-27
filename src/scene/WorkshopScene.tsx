@@ -23,7 +23,7 @@ export function WorkshopScene() {
     <Canvas
       shadows="percentage"
       dpr={[1, 1.8]}
-      gl={{ antialias: true, powerPreference: 'high-performance', toneMappingExposure: 1.08 }}
+      gl={{ antialias: true, powerPreference: 'high-performance', toneMappingExposure: 1.16 }}
       camera={{ position: [...DEFAULT_VIEW.position], fov: 42, near: 0.1, far: 90 }}
       onPointerMissed={() => selectZone(null)}
     >

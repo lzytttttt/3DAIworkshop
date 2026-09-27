@@ -5,6 +5,7 @@
 | 文档 | 状态 | 说明 |
 |---|---|---|
 | [v0.5-01-3d-scene-site.md](./v0.5-01-3d-scene-site.md) | 已交付（2026-09-25） | 3D 场景展示站：背景与目标、已确认决策、依赖、场景与 UI 规格、实施步骤、验证、风险与回退、交付记录（含偏差与遗留） |
+| [v0.6-01-fullscreen-zone-layout-brightness.md](./v0.6-01-fullscreen-zone-layout-brightness.md) | 已交付（2026-09-27） | 3D 舞台全屏、后勤区与静音专注区重排、3D 整体提亮 |
 
 首次发布版本为 `v0.5`（对应 `package.json` 的 `0.5.0`）。
 
